@@ -15,7 +15,6 @@ import com.example.threedbe.member.domain.ProviderType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -68,20 +67,9 @@ public class AuthController {
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
 	@PostMapping("/reissue")
 	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
-		String refreshToken = extractCookie(request);
-		String newAccessToken = authService.reissueAccessToken(refreshToken);
-		return ResponseEntity.ok(new TokenResponse(newAccessToken));
-	}
+		String newAccessToken = authService.reissueAccessToken(request);
 
-	private String extractCookie(HttpServletRequest request) {
-		if (request.getCookies() == null)
-			return null;
-		for (Cookie cookie : request.getCookies()) {
-			if (cookie.getName().equals("refreshToken")) {
-				return cookie.getValue();
-			}
-		}
-		return null;
+		return ResponseEntity.ok(new TokenResponse(newAccessToken));
 	}
 
 }

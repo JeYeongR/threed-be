@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.threedbe.auth.domain.RefreshToken;
 import com.example.threedbe.common.dto.PageResponse;
 import com.example.threedbe.common.exception.ThreedConflictException;
 import com.example.threedbe.common.exception.ThreedNotFoundException;
@@ -64,6 +65,11 @@ public class MemberService {
 				return Optional.of(memberRepository.save(newMember));
 			})
 			.get();
+	}
+
+	public Member findByRefreshToken(RefreshToken refreshToken) {
+		return memberRepository.findFirstByRefreshToken(refreshToken)
+			.orElseThrow(() -> new ThreedNotFoundException("존재하지 않는 회원입니다."));
 	}
 
 	public Optional<Member> findByProviderAndProviderId(ProviderType providerType, String providerId) {

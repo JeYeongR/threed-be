@@ -21,10 +21,9 @@ public class RefreshToken implements JwtToken {
 	@Column(name = "refresh_token")
 	private String value;
 
-	public RefreshToken(long memberId, AuthProperties authProperties) {
+	public RefreshToken(AuthProperties authProperties) {
 		Date validity = new Date(System.currentTimeMillis() + authProperties.getRefreshExpiration());
 		this.value = Jwts.builder()
-			.setSubject(String.valueOf(memberId))
 			.setExpiration(validity)
 			.signWith(SignatureAlgorithm.HS256, authProperties.getRefreshKey())
 			.compact();

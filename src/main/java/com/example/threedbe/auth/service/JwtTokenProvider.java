@@ -29,8 +29,8 @@ public class JwtTokenProvider {
 		return new AccessToken(memberId, authProperties);
 	}
 
-	public RefreshToken createRefreshToken(long memberId) {
-		return new RefreshToken(memberId, authProperties);
+	public RefreshToken createRefreshToken() {
+		return new RefreshToken(authProperties);
 	}
 
 	public long parseAccessToken(AccessToken accessToken) {

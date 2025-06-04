@@ -15,6 +15,7 @@ import com.example.threedbe.member.domain.ProviderType;
 import com.example.threedbe.member.service.MemberService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -48,7 +49,7 @@ public class AuthService {
 		);
 
 		AccessToken newAccessToken = jwtTokenProvider.createAccessToken(member.getId());
-		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
 		member.updateRefreshToken(refreshToken);
 
 		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
@@ -56,11 +57,12 @@ public class AuthService {
 		return new TokenResponse(newAccessToken.getValue());
 	}
 
-	public String reissueAccessToken(String refreshTokenValue) {
+	public String reissueAccessToken(HttpServletRequest request) {
+		String refreshTokenValue = extractCookie(request);
 		RefreshToken refreshToken = new RefreshToken(refreshTokenValue);
 		jwtTokenProvider.validate(refreshToken);
-		long memberId = jwtTokenProvider.parseRefreshToken(refreshToken);
-		Member member = memberService.findById(memberId);
+		Member member = memberService.findByRefreshToken(refreshToken);
+
 		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
 	}
 
@@ -77,6 +79,17 @@ public class AuthService {
 		cookie.setPath("/");
 		cookie.setMaxAge(maxAge);
 		return cookie;
+	}
+
+	private String extractCookie(HttpServletRequest request) {
+		if (request.getCookies() == null)
+			return null;
+		for (Cookie cookie : request.getCookies()) {
+			if (cookie.getName().equals("refreshToken")) {
+				return cookie.getValue();
+			}
+		}
+		return null;
 	}
 
 }
