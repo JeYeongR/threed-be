@@ -3,6 +3,7 @@ package com.example.threedbe.auth.service;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.threedbe.auth.domain.AccessToken;
 import com.example.threedbe.auth.domain.RefreshToken;
@@ -26,6 +27,7 @@ public class OAuthLoginService {
 	private final MemberService memberService;
 	private final JwtTokenProvider jwtTokenProvider;
 
+	@Transactional
 	public TokenResponse login(ProviderType providerType, String code, HttpServletResponse response) {
 		OAuthClient oAuthClient = oauthClients.get(providerType.name());
 		String accessToken = oAuthClient.requestAccessToken(code);
@@ -40,7 +42,7 @@ public class OAuthLoginService {
 		);
 
 		AccessToken newAccessToken = jwtTokenProvider.createAccessToken(member.getId());
-		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
+		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
 		member.updateRefreshToken(refreshToken);
 
 		response.addCookie(createCookie("accessToken", newAccessToken.getValue(), 60 * 60 * 2));
@@ -57,4 +59,5 @@ public class OAuthLoginService {
 		cookie.setMaxAge(maxAge);
 		return cookie;
 	}
+
 }

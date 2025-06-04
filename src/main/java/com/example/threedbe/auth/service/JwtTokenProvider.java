@@ -29,8 +29,8 @@ public class JwtTokenProvider {
 		return new AccessToken(memberId, authProperties);
 	}
 
-	public RefreshToken createRefreshToken() {
-		return new RefreshToken(authProperties);
+	public RefreshToken createRefreshToken(long memberId) {
+		return new RefreshToken(memberId, authProperties);
 	}
 
 	public long parseAccessToken(AccessToken accessToken) {
@@ -68,12 +68,10 @@ public class JwtTokenProvider {
 		}
 	}
 
-	// 새로 추가된 부분: refresh token 파싱
 	public long parseRefreshToken(RefreshToken refreshToken) {
 		return parseToken(refreshToken.getValue(), authProperties.getRefreshKey());
 	}
 
-	//  내부에서 공통으로 쓰는 토큰 파싱 메서드
 	private long parseToken(String token, String secretKey) {
 		try {
 			Claims claims = Jwts.parser()
@@ -88,4 +86,5 @@ public class JwtTokenProvider {
 			throw new ThreedBadRequestException(exception.getMessage());
 		}
 	}
+
 }

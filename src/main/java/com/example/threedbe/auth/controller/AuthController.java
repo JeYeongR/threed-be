@@ -2,6 +2,7 @@ package com.example.threedbe.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,9 +51,9 @@ public class AuthController {
 		return ResponseEntity.ok(tokenResponse);
 	}
 
-	@GetMapping("/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-		String accessToken = extractCookie(request, "accessToken");
+		String accessToken = request.getHeader("Authorization");
 		if (accessToken != null) {
 			Member member = authService.parseAccessToken(accessToken);
 			authService.logout(member, response);
@@ -63,22 +64,23 @@ public class AuthController {
 	}
 
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
-	@GetMapping("/reissue")
+	@PostMapping("/reissue")
 	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
-		String refreshToken = extractCookie(request, "refreshToken");
+		String refreshToken = extractCookie(request);
 		String newAccessToken = authService.reissueAccessToken(refreshToken);
-		Member member = authService.parseAccessToken(newAccessToken);
+		Member member = authService.parseAccessToken("Bearer " + newAccessToken);
 		return ResponseEntity.ok(new TokenResponse(newAccessToken, UserResponse.from(member)));
 	}
 
-	private String extractCookie(HttpServletRequest request, String name) {
+	private String extractCookie(HttpServletRequest request) {
 		if (request.getCookies() == null)
 			return null;
 		for (Cookie cookie : request.getCookies()) {
-			if (cookie.getName().equals(name)) {
+			if (cookie.getName().equals("refreshToken")) {
 				return cookie.getValue();
 			}
 		}
 		return null;
 	}
+
 }
