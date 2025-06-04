@@ -51,11 +51,11 @@ public class Member {
 
 	private LocalDateTime deletedAt;
 
-	public Member(AuthProvider authProvider, String email, String nickname, String profileImageUrl) {
-		this.authProvider = authProvider;
-		this.email = email;
+	public Member(String nickname, String email, String profileImageUrl, AuthProvider authProvider) {
 		this.nickname = nickname;
+		this.email = email;
 		this.profileImageUrl = profileImageUrl;
+		this.authProvider = authProvider;
 	}
 
 	public void updateRefreshToken(RefreshToken refreshToken) {

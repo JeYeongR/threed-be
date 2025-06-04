@@ -7,8 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.threedbe.auth.domain.RefreshToken;
+import com.example.threedbe.auth.dto.request.OAuthUserInfo;
 import com.example.threedbe.common.dto.PageResponse;
-import com.example.threedbe.common.exception.ThreedConflictException;
 import com.example.threedbe.common.exception.ThreedNotFoundException;
 import com.example.threedbe.common.exception.ThreedUnauthorizedException;
 import com.example.threedbe.member.domain.AuthProvider;
@@ -41,29 +42,26 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Member findOrCreate(
-		String email,
-		String name,
-		String profileImageUrl,
-		ProviderType providerType,
-		String providerId
-	) {
+	public Member findOrCreate(OAuthUserInfo oAuthUserInfo, ProviderType providerType) {
+		String providerId = oAuthUserInfo.id();
+
 		return memberRepository.findByAuthProviderProviderTypeAndAuthProviderProviderId(providerType, providerId)
-			.or(() -> {
-				Optional<Member> sameEmail = memberRepository.findByEmail(email);
-				if (sameEmail.isPresent()) {
-					ProviderType existingProvider = sameEmail.get().getAuthProvider().getProviderType();
-					throw new ThreedConflictException(String.format(
-						"'%s' 이메일은 이미 %s 계정으로 가입되어 있습니다. 해당 소셜로 로그인해주세요.",
-						email,
-						existingProvider.name()
-					));
-				}
+			.orElseGet(() -> {
 				AuthProvider authProvider = new AuthProvider(providerType, providerId);
-				Member newMember = new Member(authProvider, email, name, profileImageUrl);
-				return Optional.of(memberRepository.save(newMember));
-			})
-			.get();
+				Member newMember = new Member(
+					oAuthUserInfo.name(),
+					oAuthUserInfo.email(),
+					oAuthUserInfo.picture(),
+					authProvider
+				);
+
+				return memberRepository.save(newMember);
+			});
+	}
+
+	public Member findByRefreshToken(RefreshToken refreshToken) {
+		return memberRepository.findFirstByRefreshToken(refreshToken)
+			.orElseThrow(() -> new ThreedNotFoundException("존재하지 않는 회원입니다."));
 	}
 
 	public Optional<Member> findByProviderAndProviderId(ProviderType providerType, String providerId) {

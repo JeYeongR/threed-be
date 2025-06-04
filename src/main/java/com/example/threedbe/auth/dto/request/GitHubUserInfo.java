@@ -1,11 +1,15 @@
-package com.example.threedbe.auth.dto.userinfo;
+package com.example.threedbe.auth.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record GitHubUserInfo(
-	@JsonProperty("id") String id,
-	@JsonProperty("login") String login,
+
+	String id,
+
+	String login,
+
 	@JsonProperty("avatar_url") String avatarUrl
+
 ) implements OAuthUserInfo {
 
 	@Override
@@ -22,4 +26,5 @@ public record GitHubUserInfo(
 	public String picture() {
 		return avatarUrl;
 	}
+
 }

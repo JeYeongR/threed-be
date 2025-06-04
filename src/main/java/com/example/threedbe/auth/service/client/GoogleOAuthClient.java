@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.threedbe.auth.config.GoogleOAuthProperties;
-import com.example.threedbe.auth.dto.token.GoogleTokenResponse;
-import com.example.threedbe.auth.dto.userinfo.GoogleUserInfo;
+import com.example.threedbe.auth.dto.request.GoogleUserInfo;
+import com.example.threedbe.auth.dto.response.GoogleTokenResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -59,4 +59,5 @@ public class GoogleOAuthClient implements OAuthClient {
 			GoogleUserInfo.class
 		).getBody();
 	}
+
 }
