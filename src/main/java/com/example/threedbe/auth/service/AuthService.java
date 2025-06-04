@@ -31,30 +31,25 @@ public class AuthService {
 		AccessToken accessToken = new AccessToken(rawAccessToken);
 		jwtTokenProvider.validate(accessToken);
 		long memberId = jwtTokenProvider.parseAccessToken(accessToken);
+
 		return memberService.findById(memberId);
 	}
 
 	@Transactional
 	public TokenResponse login(ProviderType providerType, String code, HttpServletResponse response) {
 		OAuthClient oAuthClient = oauthClients.get(providerType.name());
-		String accessToken = oAuthClient.requestAccessToken(code);
-		OAuthUserInfo userInfo = oAuthClient.requestUserInfo(accessToken);
+		String requestAccessToken = oAuthClient.requestAccessToken(code);
+		OAuthUserInfo userInfo = oAuthClient.requestUserInfo(requestAccessToken);
 
-		Member member = memberService.findOrCreate(
-			userInfo.email(),
-			userInfo.name(),
-			userInfo.picture(),
-			providerType,
-			userInfo.id()
-		);
+		Member member = memberService.findOrCreate(userInfo, providerType);
 
-		AccessToken newAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+		AccessToken accessToken = jwtTokenProvider.createAccessToken(member.getId());
 		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
 		member.updateRefreshToken(refreshToken);
 
 		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
 
-		return new TokenResponse(newAccessToken.getValue());
+		return new TokenResponse(accessToken.getValue());
 	}
 
 	public String reissueAccessToken(HttpServletRequest request) {
