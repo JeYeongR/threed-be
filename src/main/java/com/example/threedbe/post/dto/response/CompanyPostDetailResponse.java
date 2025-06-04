@@ -20,6 +20,9 @@ public record CompanyPostDetailResponse(
 	@Schema(description = "썸네일 이미지 주소", example = "https://d2.naver.com/content/images/2023/07/-----------2023-07-06------4-16-49.png")
 	String thumbnailImageUrl,
 
+	@Schema(description = "분야", example = "Frontend")
+	String field,
+
 	@Schema(description = "저자")
 	AuthorResponse author,
 
@@ -58,6 +61,7 @@ public record CompanyPostDetailResponse(
 			companyPost.getTitle(),
 			companyPost.getContent(),
 			companyPost.getThumbnailImageUrl(),
+			companyPost.getField().getName(),
 			AuthorResponse.from(companyPost.getCompany()),
 			companyPost.getViewCount(),
 			companyPost.getCreatedAt(),
