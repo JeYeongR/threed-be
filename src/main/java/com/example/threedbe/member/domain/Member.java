@@ -51,7 +51,6 @@ public class Member {
 
 	private LocalDateTime deletedAt;
 
-	// 생성자
 	public Member(AuthProvider authProvider, String email, String nickname, String profileImageUrl) {
 		this.authProvider = authProvider;
 		this.email = email;
