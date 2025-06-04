@@ -1,10 +1,13 @@
-package com.example.threedbe.auth.dto.userinfo;
+package com.example.threedbe.auth.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record KakaoUserInfo(
-	@JsonProperty("id") String id,
+
+	String id,
+
 	@JsonProperty("kakao_account") KakaoAccount kakaoAccount
+
 ) implements OAuthUserInfo {
 
 	@Override
@@ -33,4 +36,5 @@ public record KakaoUserInfo(
 		@JsonProperty("profile_image_url") String profileImageUrl
 	) {
 	}
+
 }

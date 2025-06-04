@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.threedbe.auth.config.GitHubOAuthProperties;
-import com.example.threedbe.auth.dto.token.GitHubTokenResponse;
-import com.example.threedbe.auth.dto.userinfo.GitHubUserInfo;
+import com.example.threedbe.auth.dto.request.GitHubUserInfo;
+import com.example.threedbe.auth.dto.response.GitHubTokenResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -60,4 +60,5 @@ public class GitHubOAuthClient implements OAuthClient {
 			GitHubUserInfo.class
 		).getBody();
 	}
+
 }

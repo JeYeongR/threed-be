@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.threedbe.auth.config.KakaoOAuthProperties;
-import com.example.threedbe.auth.dto.token.KakaoTokenResponse;
-import com.example.threedbe.auth.dto.userinfo.KakaoUserInfo;
+import com.example.threedbe.auth.dto.request.KakaoUserInfo;
+import com.example.threedbe.auth.dto.response.KakaoTokenResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -61,4 +61,5 @@ public class KakaoOAuthClient implements OAuthClient {
 			KakaoUserInfo.class
 		).getBody();
 	}
+
 }

@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.threedbe.auth.dto.TokenResponse;
+import com.example.threedbe.auth.dto.response.TokenResponse;
 import com.example.threedbe.auth.service.AuthService;
-import com.example.threedbe.auth.service.OAuthLoginService;
+import com.example.threedbe.common.annotation.LoginMember;
 import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
-import com.example.threedbe.member.dto.response.UserResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,39 +26,42 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-	private final OAuthLoginService oAuthLoginService;
 	private final AuthService authService;
 
 	@GetMapping("/google/callback")
-	public ResponseEntity<TokenResponse> googleCallback(@RequestParam("code") String code,
+	public ResponseEntity<TokenResponse> googleCallback(
+		@RequestParam("code") String code,
 		HttpServletResponse response) {
-		TokenResponse tokenResponse = oAuthLoginService.login(ProviderType.GOOGLE, code, response);
+
+		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code, response);
+
 		return ResponseEntity.ok(tokenResponse);
 	}
 
 	@GetMapping("/kakao/callback")
-	public ResponseEntity<TokenResponse> kakaoCallback(@RequestParam("code") String code,
+	public ResponseEntity<TokenResponse> kakaoCallback(
+		@RequestParam("code") String code,
 		HttpServletResponse response) {
-		TokenResponse tokenResponse = oAuthLoginService.login(ProviderType.KAKAO, code, response);
+
+		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code, response);
+
 		return ResponseEntity.ok(tokenResponse);
 	}
 
 	@GetMapping("/github/callback")
-	public ResponseEntity<TokenResponse> githubCallback(@RequestParam("code") String code,
+	public ResponseEntity<TokenResponse> githubCallback(
+		@RequestParam("code") String code,
 		HttpServletResponse response) {
-		TokenResponse tokenResponse = oAuthLoginService.login(ProviderType.GITHUB, code, response);
+
+		TokenResponse tokenResponse = authService.login(ProviderType.GITHUB, code, response);
+
 		return ResponseEntity.ok(tokenResponse);
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-		String accessToken = request.getHeader("Authorization");
-		if (accessToken != null) {
-			Member member = authService.parseAccessToken(accessToken);
-			authService.logout(member, response);
-		} else {
-			authService.logout(null, response); // 쿠키만 삭제
-		}
+	public ResponseEntity<Void> logout(@LoginMember Member member, HttpServletResponse response) {
+		authService.logout(member, response);
+
 		return ResponseEntity.ok().build();
 	}
 
@@ -68,8 +70,7 @@ public class AuthController {
 	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
 		String refreshToken = extractCookie(request);
 		String newAccessToken = authService.reissueAccessToken(refreshToken);
-		Member member = authService.parseAccessToken("Bearer " + newAccessToken);
-		return ResponseEntity.ok(new TokenResponse(newAccessToken, UserResponse.from(member)));
+		return ResponseEntity.ok(new TokenResponse(newAccessToken));
 	}
 
 	private String extractCookie(HttpServletRequest request) {

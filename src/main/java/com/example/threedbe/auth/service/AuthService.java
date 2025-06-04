@@ -1,11 +1,17 @@
 package com.example.threedbe.auth.service;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.threedbe.auth.domain.AccessToken;
 import com.example.threedbe.auth.domain.RefreshToken;
+import com.example.threedbe.auth.dto.request.OAuthUserInfo;
+import com.example.threedbe.auth.dto.response.TokenResponse;
+import com.example.threedbe.auth.service.client.OAuthClient;
 import com.example.threedbe.member.domain.Member;
-import com.example.threedbe.member.repository.MemberRepository;
+import com.example.threedbe.member.domain.ProviderType;
 import com.example.threedbe.member.service.MemberService;
 
 import jakarta.servlet.http.Cookie;
@@ -18,13 +24,36 @@ public class AuthService {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final MemberService memberService;
-	private final MemberRepository memberRepository;
+	private final Map<String, OAuthClient> oauthClients;
 
 	public Member parseAccessToken(String rawAccessToken) {
 		AccessToken accessToken = new AccessToken(rawAccessToken);
 		jwtTokenProvider.validate(accessToken);
 		long memberId = jwtTokenProvider.parseAccessToken(accessToken);
 		return memberService.findById(memberId);
+	}
+
+	@Transactional
+	public TokenResponse login(ProviderType providerType, String code, HttpServletResponse response) {
+		OAuthClient oAuthClient = oauthClients.get(providerType.name());
+		String accessToken = oAuthClient.requestAccessToken(code);
+		OAuthUserInfo userInfo = oAuthClient.requestUserInfo(accessToken);
+
+		Member member = memberService.findOrCreate(
+			userInfo.email(),
+			userInfo.name(),
+			userInfo.picture(),
+			providerType,
+			userInfo.id()
+		);
+
+		AccessToken newAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+		member.updateRefreshToken(refreshToken);
+
+		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
+
+		return new TokenResponse(newAccessToken.getValue());
 	}
 
 	public String reissueAccessToken(String refreshTokenValue) {
@@ -35,21 +64,19 @@ public class AuthService {
 		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
 	}
 
+	@Transactional
 	public void logout(Member member, HttpServletResponse response) {
 		member.deleteRefreshToken();
-		memberRepository.save(member);
 
-		Cookie accessTokenCookie = new Cookie("accessToken", null);
-		accessTokenCookie.setHttpOnly(true);
-		accessTokenCookie.setPath("/");
-		accessTokenCookie.setMaxAge(0);
-
-		Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-		refreshTokenCookie.setHttpOnly(true);
-		refreshTokenCookie.setPath("/");
-		refreshTokenCookie.setMaxAge(0);
-
-		response.addCookie(accessTokenCookie);
-		response.addCookie(refreshTokenCookie);
+		response.addCookie(createCookie(null, 0));
 	}
+
+	private Cookie createCookie(String value, int maxAge) {
+		Cookie cookie = new Cookie("refreshToken", value);
+		cookie.setHttpOnly(true);
+		cookie.setPath("/");
+		cookie.setMaxAge(maxAge);
+		return cookie;
+	}
+
 }
