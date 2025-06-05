@@ -58,11 +58,11 @@ public class Member {
 		this.authProvider = authProvider;
 	}
 
-	public void updateRefreshToken(RefreshToken refreshToken) {
+	public void login(RefreshToken refreshToken) {
 		this.refreshToken = refreshToken;
 	}
 
-	public void deleteRefreshToken() {
+	public void logout() {
 		this.refreshToken = null;
 	}
 

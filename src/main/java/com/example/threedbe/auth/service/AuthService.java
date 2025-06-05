@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.threedbe.auth.domain.AccessToken;
 import com.example.threedbe.auth.domain.RefreshToken;
 import com.example.threedbe.auth.dto.request.OAuthUserInfo;
+import com.example.threedbe.auth.dto.response.ProviderTypeResponse;
 import com.example.threedbe.auth.dto.response.TokenResponse;
 import com.example.threedbe.auth.service.client.OAuthClient;
 import com.example.threedbe.member.domain.Member;
@@ -30,7 +31,7 @@ public class AuthService {
 	public Member parseAccessToken(String rawAccessToken) {
 		AccessToken accessToken = new AccessToken(rawAccessToken);
 		jwtTokenProvider.validate(accessToken);
-		long memberId = jwtTokenProvider.parseAccessToken(accessToken);
+		Long memberId = jwtTokenProvider.parseAccessToken(accessToken);
 
 		return memberService.findById(memberId);
 	}
@@ -45,7 +46,7 @@ public class AuthService {
 
 		AccessToken accessToken = jwtTokenProvider.createAccessToken(member.getId());
 		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
-		member.updateRefreshToken(refreshToken);
+		member.login(refreshToken);
 
 		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
 
@@ -62,10 +63,12 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void logout(Member member, HttpServletResponse response) {
-		member.deleteRefreshToken();
+	public ProviderTypeResponse logout(Member member, HttpServletResponse response) {
+		member.logout();
 
 		response.addCookie(createCookie(null, 0));
+
+		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
 	}
 
 	private Cookie createCookie(String value, int maxAge) {

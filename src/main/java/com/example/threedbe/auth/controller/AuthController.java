@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.threedbe.auth.dto.response.ProviderTypeResponse;
 import com.example.threedbe.auth.dto.response.TokenResponse;
 import com.example.threedbe.auth.service.AuthService;
 import com.example.threedbe.common.annotation.LoginMember;
@@ -58,10 +59,10 @@ public class AuthController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(@LoginMember Member member, HttpServletResponse response) {
-		authService.logout(member, response);
+	public ResponseEntity<ProviderTypeResponse> logout(@LoginMember Member member, HttpServletResponse response) {
+		ProviderTypeResponse providerTypeResponse = authService.logout(member, response);
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(providerTypeResponse);
 	}
 
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
