@@ -1,6 +1,7 @@
 package com.example.threedbe.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +15,6 @@ import com.example.threedbe.common.annotation.LoginMember;
 import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 
-import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -69,10 +68,10 @@ public class AuthController implements AuthControllerSwagger {
 
 	@Override
 	@PostMapping("/reissue")
-	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
-		String newAccessToken = authService.reissueAccessToken(request);
+	public ResponseEntity<TokenResponse> reissueAccessToken(@CookieValue("refreshToken") String refreshToken) {
+		TokenResponse tokenResponse = authService.reissueAccessToken(refreshToken);
 
-		return ResponseEntity.ok(new TokenResponse(newAccessToken));
+		return ResponseEntity.ok(tokenResponse);
 	}
 
 }

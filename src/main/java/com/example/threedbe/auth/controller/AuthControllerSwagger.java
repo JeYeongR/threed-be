@@ -14,8 +14,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "Auth API")
@@ -71,6 +71,7 @@ public interface AuthControllerSwagger {
 	@SwaggerErrorCode400
 	@SwaggerErrorCode401
 	@SwaggerErrorCode500
+	@SecurityRequirement(name = "Authorization")
 	ResponseEntity<ProviderTypeResponse> logout(@Parameter(hidden = true) Member member, HttpServletResponse response);
 
 	@Operation(
@@ -85,6 +86,7 @@ public interface AuthControllerSwagger {
 	@SwaggerErrorCode400
 	@SwaggerErrorCode401
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request);
+	@SecurityRequirement(name = "Authorization")
+	ResponseEntity<TokenResponse> reissueAccessToken(String refreshToken);
 
 }

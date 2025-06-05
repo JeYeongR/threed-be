@@ -16,7 +16,6 @@ import com.example.threedbe.member.domain.ProviderType;
 import com.example.threedbe.member.service.MemberService;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -62,13 +61,14 @@ public class AuthService {
 		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
 	}
 
-	public String reissueAccessToken(HttpServletRequest request) {
-		String refreshTokenValue = extractCookie(request);
+	public TokenResponse reissueAccessToken(String refreshTokenValue) {
 		RefreshToken refreshToken = new RefreshToken(refreshTokenValue);
 		jwtTokenProvider.validate(refreshToken);
 		Member member = memberService.findByRefreshToken(refreshToken);
 
-		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
+		AccessToken accessToken = jwtTokenProvider.createAccessToken(member.getId());
+
+		return TokenResponse.from(accessToken);
 	}
 
 	private Cookie createCookie(String value, int maxAge) {
@@ -76,18 +76,8 @@ public class AuthService {
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		cookie.setMaxAge(maxAge);
-		return cookie;
-	}
 
-	private String extractCookie(HttpServletRequest request) {
-		if (request.getCookies() == null)
-			return null;
-		for (Cookie cookie : request.getCookies()) {
-			if (cookie.getName().equals("refreshToken")) {
-				return cookie.getValue();
-			}
-		}
-		return null;
+		return cookie;
 	}
 
 }
