@@ -53,15 +53,6 @@ public class AuthService {
 		return new TokenResponse(accessToken.getValue());
 	}
 
-	public String reissueAccessToken(HttpServletRequest request) {
-		String refreshTokenValue = extractCookie(request);
-		RefreshToken refreshToken = new RefreshToken(refreshTokenValue);
-		jwtTokenProvider.validate(refreshToken);
-		Member member = memberService.findByRefreshToken(refreshToken);
-
-		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
-	}
-
 	@Transactional
 	public ProviderTypeResponse logout(Member member, HttpServletResponse response) {
 		member.logout();
@@ -69,6 +60,15 @@ public class AuthService {
 		response.addCookie(createCookie(null, 0));
 
 		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
+	}
+
+	public String reissueAccessToken(HttpServletRequest request) {
+		String refreshTokenValue = extractCookie(request);
+		RefreshToken refreshToken = new RefreshToken(refreshTokenValue);
+		jwtTokenProvider.validate(refreshToken);
+		Member member = memberService.findByRefreshToken(refreshToken);
+
+		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
 	}
 
 	private Cookie createCookie(String value, int maxAge) {
