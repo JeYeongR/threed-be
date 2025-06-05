@@ -1,6 +1,6 @@
 package com.example.threedbe.auth.controller;
 
-import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +32,7 @@ public class AuthController implements AuthControllerSwagger {
 		@RequestParam("code") String code,
 		HttpServletResponse response) {
 
-		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code, response);
+		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code);
 
 		return ResponseEntity.ok(tokenResponse);
 	}
@@ -43,29 +43,30 @@ public class AuthController implements AuthControllerSwagger {
 		@RequestParam("code") String code,
 		HttpServletResponse response) {
 
-		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code, response);
+		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code);
 
 		return ResponseEntity.ok(tokenResponse);
 	}
 
 	@Override
 	@GetMapping("/github/callback")
-	public ResponseEntity<TokenResponse> githubCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
+	public ResponseEntity<TokenResponse> githubCallback(@RequestParam("code") String code) {
+		TokenResponse tokenResponse = authService.login(ProviderType.GITHUB, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		TokenResponse tokenResponse = authService.login(ProviderType.GITHUB, code, response);
-
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override
 	@PostMapping("/logout")
 	public ResponseEntity<ProviderTypeResponse> logout(@LoginMember Member member) {
 		ProviderTypeResponse providerTypeResponse = authService.logout(member);
+		String refreshTokenCookie = authService.deleteRefreshTokenCookie();
 
 		return ResponseEntity.ok()
-			.header("Set-Cookie", createCookie(null, 0).toString())
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
 			.body(providerTypeResponse);
 	}
 
@@ -75,14 +76,6 @@ public class AuthController implements AuthControllerSwagger {
 		TokenResponse tokenResponse = authService.reissueAccessToken(refreshToken);
 
 		return ResponseEntity.ok(tokenResponse);
-	}
-
-	private ResponseCookie createCookie(String value, int maxAge) {
-		return ResponseCookie.from("refreshToken", value)
-			.path("/")
-			.maxAge(maxAge)
-			.httpOnly(true)
-			.build();
 	}
 
 }

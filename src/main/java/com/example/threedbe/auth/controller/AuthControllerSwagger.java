@@ -58,7 +58,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> githubCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> githubCallback(String code);
 
 	@Operation(
 		summary = "로그아웃",

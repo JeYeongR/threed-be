@@ -2,6 +2,7 @@ package com.example.threedbe.auth.service;
 
 import java.util.Map;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +16,6 @@ import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 import com.example.threedbe.member.service.MemberService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,7 +35,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public TokenResponse login(ProviderType providerType, String code, HttpServletResponse response) {
+	public TokenResponse login(ProviderType providerType, String code) {
 		OAuthClient oAuthClient = oauthClients.get(providerType.name());
 		String requestAccessToken = oAuthClient.requestAccessToken(code);
 		OAuthUserInfo userInfo = oAuthClient.requestUserInfo(requestAccessToken);
@@ -47,9 +46,16 @@ public class AuthService {
 		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
 		member.login(refreshToken);
 
-		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
+		return new TokenResponse(accessToken.getValue(), refreshToken.getValue());
+	}
 
-		return new TokenResponse(accessToken.getValue());
+	public String createRefreshTokenCookie(String value) {
+		return ResponseCookie.from("refreshToken", value)
+			.path("/")
+			.maxAge(60 * 60 * 24 * 28)
+			.httpOnly(true)
+			.build()
+			.toString();
 	}
 
 	@Transactional
@@ -57,6 +63,15 @@ public class AuthService {
 		member.logout();
 
 		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
+	}
+
+	public String deleteRefreshTokenCookie() {
+		return ResponseCookie.from("refreshToken", null)
+			.path("/")
+			.maxAge(0)
+			.httpOnly(true)
+			.build()
+			.toString();
 	}
 
 	public TokenResponse reissueAccessToken(String refreshTokenValue) {
@@ -67,15 +82,6 @@ public class AuthService {
 		AccessToken accessToken = jwtTokenProvider.createAccessToken(member.getId());
 
 		return TokenResponse.from(accessToken);
-	}
-
-	private Cookie createCookie(String value, int maxAge) {
-		Cookie cookie = new Cookie("refreshToken", value);
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(maxAge);
-
-		return cookie;
 	}
 
 }
