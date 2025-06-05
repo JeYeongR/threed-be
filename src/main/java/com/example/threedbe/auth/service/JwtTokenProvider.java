@@ -33,16 +33,16 @@ public class JwtTokenProvider {
 		return new RefreshToken(authProperties);
 	}
 
-	public long parseAccessToken(AccessToken accessToken) {
+	public Long parseAccessToken(AccessToken accessToken) {
 		try {
 			Claims claims = Jwts.parser()
 				.setSigningKey(authProperties.getAccessKey())
 				.parseClaimsJws(accessToken.getValue())
 				.getBody();
 
-			return Long.parseLong(claims.getSubject());
+			return Long.valueOf(claims.getSubject());
 		} catch (ExpiredJwtException exception) {
-			return Long.parseLong(exception.getClaims().getSubject());
+			return Long.valueOf(exception.getClaims().getSubject());
 		} catch (JwtException exception) {
 			throw new ThreedBadRequestException(exception.getMessage());
 		}
