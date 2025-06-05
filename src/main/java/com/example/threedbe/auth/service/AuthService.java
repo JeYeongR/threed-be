@@ -72,6 +72,7 @@ public class AuthService {
 	public String deleteRefreshTokenCookie() {
 		return ResponseCookie.from(REFRESH_TOKEN)
 			.path("/")
+			.maxAge(0)
 			.httpOnly(true)
 			.build()
 			.toString();

@@ -72,7 +72,9 @@ public class AuthController implements AuthControllerSwagger {
 
 	@Override
 	@PostMapping("/reissue")
-	public ResponseEntity<TokenResponse> reissueAccessToken(@CookieValue("refreshToken") String refreshToken) {
+	public ResponseEntity<TokenResponse> reissueAccessToken(
+		@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+
 		TokenResponse tokenResponse = authService.reissueAccessToken(refreshToken);
 
 		return ResponseEntity.ok(tokenResponse);
