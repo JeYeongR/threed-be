@@ -16,7 +16,6 @@ import com.example.threedbe.common.annotation.LoginMember;
 import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,13 +27,13 @@ public class AuthController implements AuthControllerSwagger {
 
 	@Override
 	@GetMapping("/google/callback")
-	public ResponseEntity<TokenResponse> googleCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
-
+	public ResponseEntity<TokenResponse> googleCallback(@RequestParam("code") String code) {
 		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override

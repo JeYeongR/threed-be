@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "Auth API")
 public interface AuthControllerSwagger {
@@ -32,7 +31,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> googleCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> googleCallback(String code);
 
 	@Operation(
 		summary = "카카오 소셜 로그인",
