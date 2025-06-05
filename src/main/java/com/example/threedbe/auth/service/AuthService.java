@@ -53,10 +53,8 @@ public class AuthService {
 	}
 
 	@Transactional
-	public ProviderTypeResponse logout(Member member, HttpServletResponse response) {
+	public ProviderTypeResponse logout(Member member) {
 		member.logout();
-
-		response.addCookie(createCookie(null, 0));
 
 		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
 	}

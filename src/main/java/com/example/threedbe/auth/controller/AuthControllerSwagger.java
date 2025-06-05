@@ -72,7 +72,7 @@ public interface AuthControllerSwagger {
 	@SwaggerErrorCode401
 	@SwaggerErrorCode500
 	@SecurityRequirement(name = "Authorization")
-	ResponseEntity<ProviderTypeResponse> logout(@Parameter(hidden = true) Member member, HttpServletResponse response);
+	ResponseEntity<ProviderTypeResponse> logout(@Parameter(hidden = true) Member member);
 
 	@Operation(
 		summary = "엑세스 토큰 재발급",
