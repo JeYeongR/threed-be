@@ -14,9 +14,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "Auth API")
 public interface AuthControllerSwagger {
@@ -32,7 +31,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> googleCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> googleCallback(String code);
 
 	@Operation(
 		summary = "카카오 소셜 로그인",
@@ -45,7 +44,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> kakaoCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> kakaoCallback(String code);
 
 	@Operation(
 		summary = "깃허브 소셜 로그인",
@@ -58,7 +57,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> githubCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> githubCallback(String code);
 
 	@Operation(
 		summary = "로그아웃",
@@ -71,7 +70,8 @@ public interface AuthControllerSwagger {
 	@SwaggerErrorCode400
 	@SwaggerErrorCode401
 	@SwaggerErrorCode500
-	ResponseEntity<ProviderTypeResponse> logout(@Parameter(hidden = true) Member member, HttpServletResponse response);
+	@SecurityRequirement(name = "Authorization")
+	ResponseEntity<ProviderTypeResponse> logout(@Parameter(hidden = true) Member member);
 
 	@Operation(
 		summary = "엑세스 토큰 재발급",
@@ -85,6 +85,7 @@ public interface AuthControllerSwagger {
 	@SwaggerErrorCode400
 	@SwaggerErrorCode401
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request);
+	@SecurityRequirement(name = "Authorization")
+	ResponseEntity<TokenResponse> reissueAccessToken(String refreshToken);
 
 }

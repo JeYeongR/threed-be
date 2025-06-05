@@ -2,6 +2,7 @@ package com.example.threedbe.auth.service;
 
 import java.util.Map;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,6 @@ import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 import com.example.threedbe.member.service.MemberService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +26,8 @@ public class AuthService {
 	private final MemberService memberService;
 	private final Map<String, OAuthClient> oauthClients;
 
+	private static final String REFRESH_TOKEN = "refreshToken";
+
 	public Member parseAccessToken(String rawAccessToken) {
 		AccessToken accessToken = new AccessToken(rawAccessToken);
 		jwtTokenProvider.validate(accessToken);
@@ -37,7 +37,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public TokenResponse login(ProviderType providerType, String code, HttpServletResponse response) {
+	public TokenResponse login(ProviderType providerType, String code) {
 		OAuthClient oAuthClient = oauthClients.get(providerType.name());
 		String requestAccessToken = oAuthClient.requestAccessToken(code);
 		OAuthUserInfo userInfo = oAuthClient.requestUserInfo(requestAccessToken);
@@ -48,46 +48,44 @@ public class AuthService {
 		RefreshToken refreshToken = jwtTokenProvider.createRefreshToken();
 		member.login(refreshToken);
 
-		response.addCookie(createCookie(refreshToken.getValue(), 60 * 60 * 24 * 28));
+		return new TokenResponse(accessToken.getValue(), refreshToken.getValue());
+	}
 
-		return new TokenResponse(accessToken.getValue());
+	public String createRefreshTokenCookie(String value) {
+		long refreshTokenExpiration = jwtTokenProvider.getRefreshTokenExpiration();
+
+		return ResponseCookie.from(REFRESH_TOKEN, value)
+			.path("/")
+			.maxAge(refreshTokenExpiration)
+			.httpOnly(true)
+			.build()
+			.toString();
 	}
 
 	@Transactional
-	public ProviderTypeResponse logout(Member member, HttpServletResponse response) {
+	public ProviderTypeResponse logout(Member member) {
 		member.logout();
-
-		response.addCookie(createCookie(null, 0));
 
 		return ProviderTypeResponse.from(member.getAuthProvider().getProviderType());
 	}
 
-	public String reissueAccessToken(HttpServletRequest request) {
-		String refreshTokenValue = extractCookie(request);
+	public String deleteRefreshTokenCookie() {
+		return ResponseCookie.from(REFRESH_TOKEN)
+			.path("/")
+			.maxAge(0)
+			.httpOnly(true)
+			.build()
+			.toString();
+	}
+
+	public TokenResponse reissueAccessToken(String refreshTokenValue) {
 		RefreshToken refreshToken = new RefreshToken(refreshTokenValue);
 		jwtTokenProvider.validate(refreshToken);
 		Member member = memberService.findByRefreshToken(refreshToken);
 
-		return jwtTokenProvider.createAccessToken(member.getId()).getValue();
-	}
+		AccessToken accessToken = jwtTokenProvider.createAccessToken(member.getId());
 
-	private Cookie createCookie(String value, int maxAge) {
-		Cookie cookie = new Cookie("refreshToken", value);
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(maxAge);
-		return cookie;
-	}
-
-	private String extractCookie(HttpServletRequest request) {
-		if (request.getCookies() == null)
-			return null;
-		for (Cookie cookie : request.getCookies()) {
-			if (cookie.getName().equals("refreshToken")) {
-				return cookie.getValue();
-			}
-		}
-		return null;
+		return TokenResponse.from(accessToken);
 	}
 
 }

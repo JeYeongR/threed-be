@@ -1,7 +1,5 @@
 package com.example.threedbe.member.service;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -62,14 +60,6 @@ public class MemberService {
 	public Member findByRefreshToken(RefreshToken refreshToken) {
 		return memberRepository.findFirstByRefreshToken(refreshToken)
 			.orElseThrow(() -> new ThreedNotFoundException("존재하지 않는 회원입니다."));
-	}
-
-	public Optional<Member> findByProviderAndProviderId(ProviderType providerType, String providerId) {
-		return memberRepository.findByAuthProviderProviderTypeAndAuthProviderProviderId(providerType, providerId);
-	}
-
-	public Optional<Member> findByEmail(String email) {
-		return memberRepository.findByEmail(email);
 	}
 
 	public PageResponse<AuthoredPostResponse> findAuthoredPosts(Member member, AuthoredPostRequest request) {

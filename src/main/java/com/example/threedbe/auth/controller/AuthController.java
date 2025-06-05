@@ -1,6 +1,8 @@
 package com.example.threedbe.auth.controller;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +16,6 @@ import com.example.threedbe.common.annotation.LoginMember;
 import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 
-import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,51 +27,56 @@ public class AuthController implements AuthControllerSwagger {
 
 	@Override
 	@GetMapping("/google/callback")
-	public ResponseEntity<TokenResponse> googleCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
+	public ResponseEntity<TokenResponse> googleCallback(@RequestParam("code") String code) {
+		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		TokenResponse tokenResponse = authService.login(ProviderType.GOOGLE, code, response);
-
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override
 	@GetMapping("/kakao/callback")
-	public ResponseEntity<TokenResponse> kakaoCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
+	public ResponseEntity<TokenResponse> kakaoCallback(@RequestParam("code") String code) {
+		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code, response);
-
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override
 	@GetMapping("/github/callback")
-	public ResponseEntity<TokenResponse> githubCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
+	public ResponseEntity<TokenResponse> githubCallback(@RequestParam("code") String code) {
+		TokenResponse tokenResponse = authService.login(ProviderType.GITHUB, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		TokenResponse tokenResponse = authService.login(ProviderType.GITHUB, code, response);
-
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override
 	@PostMapping("/logout")
-	public ResponseEntity<ProviderTypeResponse> logout(@LoginMember Member member, HttpServletResponse response) {
-		ProviderTypeResponse providerTypeResponse = authService.logout(member, response);
+	public ResponseEntity<ProviderTypeResponse> logout(@LoginMember Member member) {
+		ProviderTypeResponse providerTypeResponse = authService.logout(member);
+		String refreshTokenCookie = authService.deleteRefreshTokenCookie();
 
-		return ResponseEntity.ok(providerTypeResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(providerTypeResponse);
 	}
 
 	@Override
 	@PostMapping("/reissue")
-	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
-		String newAccessToken = authService.reissueAccessToken(request);
+	public ResponseEntity<TokenResponse> reissueAccessToken(
+		@CookieValue(value = "refreshToken", required = false) String refreshToken) {
 
-		return ResponseEntity.ok(new TokenResponse(newAccessToken));
+		TokenResponse tokenResponse = authService.reissueAccessToken(refreshToken);
+
+		return ResponseEntity.ok(tokenResponse);
 	}
 
 }
