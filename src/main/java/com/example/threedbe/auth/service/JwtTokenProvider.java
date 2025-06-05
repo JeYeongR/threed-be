@@ -54,7 +54,7 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public boolean isUnexpired(JwtToken jwtToken) {
+	private boolean isUnexpired(JwtToken jwtToken) {
 		try {
 			Jwts.parser()
 				.setSigningKey(jwtToken.getSecretKey(authProperties))
@@ -68,8 +68,8 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public long parseRefreshToken(RefreshToken refreshToken) {
-		return parseToken(refreshToken.getValue(), authProperties.getRefreshKey());
+	public long getRefreshTokenExpiration() {
+		return authProperties.getRefreshExpiration();
 	}
 
 	private long parseToken(String token, String secretKey) {

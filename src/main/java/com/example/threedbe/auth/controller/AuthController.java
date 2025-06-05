@@ -39,13 +39,13 @@ public class AuthController implements AuthControllerSwagger {
 
 	@Override
 	@GetMapping("/kakao/callback")
-	public ResponseEntity<TokenResponse> kakaoCallback(
-		@RequestParam("code") String code,
-		HttpServletResponse response) {
-
+	public ResponseEntity<TokenResponse> kakaoCallback(@RequestParam("code") String code) {
 		TokenResponse tokenResponse = authService.login(ProviderType.KAKAO, code);
+		String refreshTokenCookie = authService.createRefreshTokenCookie(tokenResponse.refreshToken());
 
-		return ResponseEntity.ok(tokenResponse);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
+			.body(tokenResponse);
 	}
 
 	@Override

@@ -17,7 +17,7 @@ public record TokenResponse(
 		return new TokenResponse(accessToken.getValue());
 	}
 
-	public TokenResponse(String accessToken) {
+	private TokenResponse(String accessToken) {
 		this(accessToken, null);
 	}
 

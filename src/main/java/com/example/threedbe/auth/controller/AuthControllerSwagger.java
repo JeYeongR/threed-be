@@ -45,7 +45,7 @@ public interface AuthControllerSwagger {
 		})
 	@SwaggerErrorCode400
 	@SwaggerErrorCode500
-	ResponseEntity<TokenResponse> kakaoCallback(String code, @Parameter(hidden = true) HttpServletResponse response);
+	ResponseEntity<TokenResponse> kakaoCallback(String code);
 
 	@Operation(
 		summary = "깃허브 소셜 로그인",

@@ -26,6 +26,8 @@ public class AuthService {
 	private final MemberService memberService;
 	private final Map<String, OAuthClient> oauthClients;
 
+	private static final String REFRESH_TOKEN = "refreshToken";
+
 	public Member parseAccessToken(String rawAccessToken) {
 		AccessToken accessToken = new AccessToken(rawAccessToken);
 		jwtTokenProvider.validate(accessToken);
@@ -50,9 +52,11 @@ public class AuthService {
 	}
 
 	public String createRefreshTokenCookie(String value) {
-		return ResponseCookie.from("refreshToken", value)
+		long refreshTokenExpiration = jwtTokenProvider.getRefreshTokenExpiration();
+
+		return ResponseCookie.from(REFRESH_TOKEN, value)
 			.path("/")
-			.maxAge(60 * 60 * 24 * 28)
+			.maxAge(refreshTokenExpiration)
 			.httpOnly(true)
 			.build()
 			.toString();
@@ -66,9 +70,8 @@ public class AuthService {
 	}
 
 	public String deleteRefreshTokenCookie() {
-		return ResponseCookie.from("refreshToken", null)
+		return ResponseCookie.from(REFRESH_TOKEN)
 			.path("/")
-			.maxAge(0)
 			.httpOnly(true)
 			.build()
 			.toString();
