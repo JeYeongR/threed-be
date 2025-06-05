@@ -51,7 +51,6 @@ public abstract class Post extends BaseEntity {
 
 	private String thumbnailImageUrl;
 
-	@Column(nullable = false)
 	@Enumerated(value = EnumType.STRING)
 	private Field field;
 
