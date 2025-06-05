@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.threedbe.auth.dto.response.ProviderTypeResponse;
 import com.example.threedbe.auth.dto.response.TokenResponse;
 import com.example.threedbe.auth.service.AuthService;
 import com.example.threedbe.common.annotation.LoginMember;
@@ -14,19 +15,18 @@ import com.example.threedbe.member.domain.Member;
 import com.example.threedbe.member.domain.ProviderType;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "auth-controller", description = "소셜 로그인 및 인증 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class AuthController implements AuthControllerSwagger {
 
 	private final AuthService authService;
 
+	@Override
 	@GetMapping("/google/callback")
 	public ResponseEntity<TokenResponse> googleCallback(
 		@RequestParam("code") String code,
@@ -37,6 +37,7 @@ public class AuthController {
 		return ResponseEntity.ok(tokenResponse);
 	}
 
+	@Override
 	@GetMapping("/kakao/callback")
 	public ResponseEntity<TokenResponse> kakaoCallback(
 		@RequestParam("code") String code,
@@ -47,6 +48,7 @@ public class AuthController {
 		return ResponseEntity.ok(tokenResponse);
 	}
 
+	@Override
 	@GetMapping("/github/callback")
 	public ResponseEntity<TokenResponse> githubCallback(
 		@RequestParam("code") String code,
@@ -57,14 +59,15 @@ public class AuthController {
 		return ResponseEntity.ok(tokenResponse);
 	}
 
+	@Override
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(@LoginMember Member member, HttpServletResponse response) {
-		authService.logout(member, response);
+	public ResponseEntity<ProviderTypeResponse> logout(@LoginMember Member member, HttpServletResponse response) {
+		ProviderTypeResponse providerTypeResponse = authService.logout(member, response);
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(providerTypeResponse);
 	}
 
-	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 이용해 Access Token을 재발급합니다.")
+	@Override
 	@PostMapping("/reissue")
 	public ResponseEntity<TokenResponse> reissueAccessToken(HttpServletRequest request) {
 		String newAccessToken = authService.reissueAccessToken(request);
