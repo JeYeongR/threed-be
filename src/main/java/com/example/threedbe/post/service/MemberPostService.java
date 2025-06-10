@@ -125,8 +125,9 @@ public class MemberPostService {
 	public MemberPostEditResponse findMemberPostForEdit(Member member, Long postId) {
 		MemberPost memberPost = findMemberPostDetailById(postId);
 		validateAuthor(memberPost, member);
+		boolean isMyPost = memberPost.isAuthor(member);
 
-		return MemberPostEditResponse.from(memberPost);
+		return MemberPostEditResponse.from(memberPost, isMyPost);
 	}
 
 	public ListResponse<MemberPostResponse> findPopularMemberPosts(MemberPostPopularRequest request) {

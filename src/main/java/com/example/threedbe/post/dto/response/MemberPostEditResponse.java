@@ -21,11 +21,14 @@ public record MemberPostEditResponse(
 	String field,
 
 	@Schema(description = "기술들", example = "[\"REACT\", \"JAVASCRIPT\"]")
-	List<String> skills
+	List<String> skills,
+
+	@Schema(description = "내 포스트 여부", example = "true")
+	boolean isMyPost
 
 ) {
 
-	public static MemberPostEditResponse from(MemberPost memberPost) {
+	public static MemberPostEditResponse from(MemberPost memberPost, boolean isMyPost) {
 		return new MemberPostEditResponse(
 			memberPost.getId(),
 			memberPost.getTitle(),
@@ -34,7 +37,8 @@ public record MemberPostEditResponse(
 			memberPost.getSkills()
 				.stream()
 				.map(skill -> skill.getSkill().getName())
-				.toList()
+				.toList(),
+			isMyPost
 		);
 	}
 
