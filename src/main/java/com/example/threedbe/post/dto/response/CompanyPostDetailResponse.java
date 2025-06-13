@@ -64,7 +64,7 @@ public record CompanyPostDetailResponse(
 			companyPost.getField().getName(),
 			AuthorResponse.from(companyPost.getCompany()),
 			companyPost.getViewCount(),
-			companyPost.getCreatedAt(),
+			companyPost.getPublishedAt(),
 			companyPost.getSourceUrl(),
 			bookmarkCount,
 			isBookmarked,
