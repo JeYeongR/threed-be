@@ -27,11 +27,11 @@ Threed는 개발자들을 위한 기술 블로그 및 포스트 공유 플랫폼
 
 ```
 src/main/java/com/example/threedbe/
-├── auth/           # 인증 관련 기능
-├── bookmark/       # 북마크 기능
-├── common/         # 공통 유틸리티 및 설정
-├── member/         # 회원 기능
-├── post/           # 포스트 기능
+├── auth/           # 인증 및 OAuth 관련 기능 (토큰 관리, 소셜 로그인)
+├── bookmark/       # 북마크 관련 기능
+├── common/         # 공통 유틸리티, 예외 처리, CORS 설정 등
+├── member/         # 회원 정보 관리 기능
+├── post/           # 포스트, 댓글, 이미지 관련 기능
 └── ThreedBeApplication.java
 ```
 
