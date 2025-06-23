@@ -106,7 +106,6 @@ public class CompanyPostRepositoryImpl implements CompanyPostRepositoryCustom {
 	public Optional<CompanyPost> findCompanyPostDetailById(Long postId) {
 		CompanyPost post = queryFactory
 			.selectFrom(companyPost)
-			.leftJoin(companyPost.bookmarks).fetchJoin()
 			.where(companyPost.id.eq(postId), companyPost.publishedAt.isNotNull())
 			.fetchOne();
 

@@ -10,7 +10,6 @@ import org.hibernate.annotations.SQLDelete;
 import com.example.threedbe.bookmark.domain.Bookmark;
 import com.example.threedbe.common.domain.BaseEntity;
 import com.example.threedbe.common.exception.ThreedBadRequestException;
-import com.example.threedbe.member.domain.Member;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +20,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
@@ -29,7 +29,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "posts")
+@Table(name = "posts", indexes = @Index(name = "idx_posts_published_at_field", columnList = "published_at DESC, field"))
 @Entity
 @Getter
 @SQLDelete(sql = "UPDATE posts SET updated_at = NOW() WHERE id = ?")
@@ -58,6 +58,10 @@ public abstract class Post extends BaseEntity {
 	@ColumnDefault("0")
 	private int viewCount;
 
+	@Column(nullable = false)
+	@ColumnDefault("0")
+	private int bookmarkCount;
+
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Bookmark> bookmarks;
 
@@ -67,13 +71,12 @@ public abstract class Post extends BaseEntity {
 		this.viewCount++;
 	}
 
-	public int getBookmarkCount() {
-		return this.bookmarks.size();
+	public void increaseBookmarkCount() {
+		this.bookmarkCount++;
 	}
 
-	public boolean isBookmarkedBy(Member member) {
-		return this.bookmarks.stream()
-			.anyMatch(bookmark -> bookmark.getMember().equals(member));
+	public void decreaseBookmarkCount() {
+		this.bookmarkCount--;
 	}
 
 	public boolean isNew(LocalDateTime now) {
