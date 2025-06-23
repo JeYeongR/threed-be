@@ -36,6 +36,7 @@ public class BookmarkService {
 			});
 
 		member.addBookmark(post);
+		post.increaseBookmarkCount();
 	}
 
 	@Transactional
@@ -46,6 +47,7 @@ public class BookmarkService {
 			.orElseThrow(() -> new ThreedNotFoundException("북마크하지 않은 포스트입니다."));
 
 		member.removeBookmark(bookmark);
+		post.decreaseBookmarkCount();
 	}
 
 	public PageResponse<BookmarkedPostResponse> findBookmarkedPosts(Member member, BookmarkedPostRequest request) {

@@ -30,6 +30,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
 
 @Repository
@@ -50,6 +51,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 			.exists();
 
 		Post foundPost = queryFactory.selectFrom(post)
+			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.where(
 				post.id.eq(postId),
 				post.publishedAt.isNotNull(),

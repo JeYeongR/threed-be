@@ -59,6 +59,10 @@ public abstract class Post extends BaseEntity {
 	@ColumnDefault("0")
 	private int viewCount;
 
+	@Column(nullable = false)
+	@ColumnDefault("0")
+	private int bookmarkCount;
+
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Bookmark> bookmarks;
 
@@ -68,8 +72,16 @@ public abstract class Post extends BaseEntity {
 		this.viewCount++;
 	}
 
+	public void increaseBookmarkCount() {
+		this.bookmarkCount++;
+	}
+
+	public void decreaseBookmarkCount() {
+		this.bookmarkCount--;
+	}
+
 	public int getBookmarkCount() {
-		return this.bookmarks.size();
+		return this.bookmarkCount;
 	}
 
 	public boolean isBookmarkedBy(Member member) {
