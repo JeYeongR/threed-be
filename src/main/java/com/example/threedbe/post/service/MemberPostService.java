@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.threedbe.bookmark.repository.BookmarkRepository;
 import com.example.threedbe.common.dto.ListResponse;
 import com.example.threedbe.common.dto.PageResponse;
 import com.example.threedbe.common.exception.ThreedBadRequestException;
@@ -42,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberPostService {
 
 	private final MemberPostRepository memberPostRepository;
+	private final BookmarkRepository bookmarkRepository;
 	private final SkillService skillService;
 	private final ThumbnailService thumbnailService;
 	private final S3Service s3Service;
@@ -110,7 +112,7 @@ public class MemberPostService {
 		memberPost.increaseViewCount();
 
 		int bookmarkCount = memberPost.getBookmarkCount();
-		boolean isBookmarked = memberPost.isBookmarkedBy(member);
+		boolean isBookmarked = bookmarkRepository.existsByMemberAndPost(member, memberPost);
 		boolean isMyPost = memberPost.isAuthor(member);
 
 		LocalDateTime publishedAt = memberPost.getPublishedAt();

@@ -10,7 +10,6 @@ import org.hibernate.annotations.SQLDelete;
 import com.example.threedbe.bookmark.domain.Bookmark;
 import com.example.threedbe.common.domain.BaseEntity;
 import com.example.threedbe.common.exception.ThreedBadRequestException;
-import com.example.threedbe.member.domain.Member;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -78,15 +77,6 @@ public abstract class Post extends BaseEntity {
 
 	public void decreaseBookmarkCount() {
 		this.bookmarkCount--;
-	}
-
-	public int getBookmarkCount() {
-		return this.bookmarkCount;
-	}
-
-	public boolean isBookmarkedBy(Member member) {
-		return this.bookmarks.stream()
-			.anyMatch(bookmark -> bookmark.getMember().equals(member));
 	}
 
 	public boolean isNew(LocalDateTime now) {

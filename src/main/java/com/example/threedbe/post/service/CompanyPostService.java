@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.threedbe.bookmark.repository.BookmarkRepository;
 import com.example.threedbe.common.dto.ListResponse;
 import com.example.threedbe.common.dto.PageResponse;
 import com.example.threedbe.common.exception.ThreedNotFoundException;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class CompanyPostService {
 
 	private final CompanyPostRepository companyPostRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	public PageResponse<CompanyPostResponse> search(CompanyPostSearchRequest request) {
 		List<Field> fields = Field.fromNames(request.fields());
@@ -61,7 +63,7 @@ public class CompanyPostService {
 		companyPost.increaseViewCount();
 
 		int bookmarkCount = companyPost.getBookmarkCount();
-		boolean isBookmarked = companyPost.isBookmarkedBy(member);
+		boolean isBookmarked = bookmarkRepository.existsByMemberAndPost(member, companyPost);
 
 		LocalDateTime publishedAt = companyPost.getPublishedAt();
 		Long nextId = companyPostRepository.findNextId(publishedAt)
