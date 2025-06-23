@@ -21,6 +21,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
@@ -29,7 +30,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "posts")
+@Table(name = "posts", indexes = @Index(name = "idx_posts_published_at_field", columnList = "published_at DESC, field"))
 @Entity
 @Getter
 @SQLDelete(sql = "UPDATE posts SET updated_at = NOW() WHERE id = ?")
